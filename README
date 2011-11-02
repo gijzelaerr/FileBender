@@ -1,13 +1,30 @@
+INTRODUCTION
+============
+
+This is filebender, the django clone of filesender. I use this for prototyping
+things that probably will be implemented into filesender.
+
+FileSender and FileBender are client side software to share (large) files over
+HTTP using a browser only. It supports large files. FileBender also supports
+client side file encryption.
+
+
+LICENSE
+=======
+All code in this repo is released under the conditions of the Apache License 2.0
+
+
 REQUIREMENTS
 ============
 
 * Django 1.2
 
+for saml:
+
 * python-saml2
-	https://code.launchpad.net/~lgs/pysaml2/main
-	
-    http://code.google.com/p/django-saml2-sp/
-	
+    * https://code.launchpad.net/~lgs/pysaml2/main
+    * http://code.google.com/p/django-saml2-sp/
+
 * xmlsec1
 
 * pip install httplib2
