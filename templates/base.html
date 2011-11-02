@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>FileBender</title>
+<link rel="stylesheet" type="text/css" media="all" href="{{ MEDIA_URL }}css/reset.css" />
+<link rel="stylesheet" type="text/css" media="all" href="{{ MEDIA_URL }}css/text.css" />
+<link rel="stylesheet" type="text/css" media="all" href="{{ MEDIA_URL }}css/960.css" />
+<link rel="stylesheet" type="text/css" media="all" href="{{ MEDIA_URL }}css/filebender.css" />
+
+{% block header %}
+{% endblock %}
+
+</head>
+
+<body>
+
+<h1><a href="http://code.google.com/p/filebender/">FileBender</a></h1>
+
+
+<div class="container_12">
+
+	{% if user.is_authenticated %}
+	
+		<div class="grid_2 prefix_3">
+	    	<p>logged in as {{ user.username }}</p>
+	    </div>
+	    
+	  	<div class="grid_1">
+	  		<p><a href="/bigfiles/upload/">File Upload</a></p>
+	  	</div>
+	
+	  	<div class="grid_1">
+			<p><a href="/bigfiles/list/">File List</a></p>
+	  	</div>
+	  	
+	  	<div class="grid_1">
+	  		<p><a href="{{ LOGOUT_URL }}">Logout</a></p>
+	  	</div>
+	  	
+	  	<div class="clear"></div>
+	
+	{% else %}
+	
+		<div class="grid_1 prefix_7">
+	    	<p><a href="{{ LOGIN_URL }}">log in</a></p>
+	    </div>
+	    
+	     <div class="clear"></div>
+	
+	{% endif %}
+	
+	<div class="grid_12">
+		{% block pagetitle %}
+		{% endblock %}
+	</div>
+	<div class="clear"></div>
+
+
+	<div class="grid_6 prefix_1">
+		{% block content %}
+		{% endblock %}
+	</div>
+	 <div class="clear"></div>
+
+</div>
+
+</body>
+</html>

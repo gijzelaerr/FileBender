@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h2>File Upload</h2>
+  
+  <script src="{{ MEDIA_URL }}js/sjcl.js" type="text/javascript"></script>
+  <script src="{{ MEDIA_URL }}js/upload.js" type="text/javascript"></script>
+  <script src="{{ MEDIA_URL }}js/BlobBuilder.js" type="text/javascript"></script>
+
+  <form id="upload_javascript" enctype="multipart/form-data" method="post" action="/bigfiles/upload/">
+     {% csrf_token %}
+
+    <table>
+        <tr>
+            <td><label for="id_file">File:</label></td>
+            <td><input type="file" name="file" id="id_file" onchange="upload.selected();"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <div id="fileName"></div>
+                <div id="fileSize"></div>
+                <div id="fileType"></div>
+                <div id="progressNumber"></div>         
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_message">Receiver:</label></td>
+            <td>
+                {{ form.receiver.errors }}
+                {{ form.receiver }}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_message">Message:</label></td>
+            <td>
+                {{ form.message.errors }}
+                {{ form.message }}
+            </td>
+        </tr>
+        <tr><td><label for="id_message">Expire Date:</label></td>
+            <td>
+                {{ form.expire_date.errors }}
+                {{ form.expire_date }}
+            </td>
+        </tr>
+
+          <tr>
+            <td><label for="id_docrypt">Enable encryption:</label></td>
+            <td><input type="checkbox" name="docrypt" id="id_docrypt" checked="true"></td>
+        </tr>
+
+
+        <tr>
+            <td><label for="id_key">Key:</label></td>
+            <td><input type="text" name="key" id="id_key" value="password"/></td>
+        </tr>
+        <tr><td></td><td>
+            <input type="button" onclick="upload.start()" value="Upload" />
+        </td></tr>
+    </table>
+    
+
+  </form>
+
+{% endblock %}
+
+
+
+
+

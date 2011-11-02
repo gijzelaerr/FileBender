@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+
+{% block pagetitle %}
+<h2>File List</h2>
+{% endblock %}
+
+{% block content %}
+
+{% if bigfiles %}
+
+
+
+    <table border="1">
+    <tr>
+    <td><b>Direct Link</b></td>
+    <td><b>Download page</b></td>
+    <td><b>Upload date</b></td>
+    <td><b>Expire Date</b></td>
+    <td><b>MD5</b></td>
+    <td><b>Delete</b></td>
+    </tr>
+ 	{% for bigfile in bigfiles %}
+       <tr>
+	   <td><a href="{{ STORAGE_URL }}/{{ bigfile.secret }}/{{ bigfile.name }}">{{ bigfile.name }}</a></td>
+	   <td><a href="/bigfiles/download/{{ bigfile.id }}/{{ bigfile.secret }}/">download</a></td>
+       <td>{{ bigfile.upload_date }}</td>
+       <td>{{ bigfile.expire_date }}</td>
+       <td>{{ bigfile.md5 }}</td>
+	   <td><a href="/bigfiles/delete/{{ bigfile.id }}/">delete</a></td>
+	   </tr>
+	{% endfor %}
+	</table>
+{% else %}
+	No Files
+{% endif %}
+
+
+{% endblock %}
+
+
+<tr><td>File name</td><td>{{ bigfile.name }}</td></tr>
+<tr><td>Upload date</td><td>{{ bigfile.upload_date }}</td></tr>
+<tr><td>Expire date</td><td>{{ bigfile.expire_date }}</td></tr>
+<tr><td>Message</td><td>{{ bigfile.message }}</td></tr>
+<tr><td>MD5</td><td>{{ bigfile.md5 }}</td></tr>

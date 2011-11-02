@@ -1,0 +1,42 @@
+body {
+    background: #123;
+    border-top: 5px solid #000;
+    color: #333;
+    font-size: 11px;
+    padding: 20px 0 40px;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    //font-weight: bold;
+    text-align: center;
+}
+
+h1 a {
+    color:#fff;
+    font-size:80px;
+
+}
+
+h2 {
+    padding: 5px 0 0;
+    text-align: center;
+}
+
+p {
+    overflow: hidden;
+    padding: 0px 0;
+    text-align: center;
+}
+
+.container_12 {
+    background: #fff;
+    margin-bottom: 20px;
+}

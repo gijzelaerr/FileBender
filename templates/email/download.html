@@ -1,0 +1,12 @@
+Hello!
+
+I'm filebender. I have a file for you, uploaded by {{ from }}.
+
+{% if message %}
+{{ from }} left a message for you:
+    {{ message }}
+{% endif %}
+
+You can download the file here:
+
+ {{ url }}
