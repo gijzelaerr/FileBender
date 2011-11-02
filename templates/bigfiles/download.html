@@ -4,8 +4,8 @@
 
 <script src="{{ MEDIA_URL }}js/sjcl.js" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}js/FileSaver.js" type="text/javascript"></script>
-<script src="{{ MEDIA_URL }}js/download.js" type="text/javascript"></script>
 <script src="{{ MEDIA_URL }}js/BlobBuilder.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}js/FormCrypt.js" type="text/javascript"></script>
 
 <h3>File Info</h3>
 <table>
@@ -16,8 +16,10 @@
 <tr><td>Message</td><td>{{ bigfile.message }}</td></tr>
 <tr><td>MD5</td><td>{{ bigfile.md5 }}</td></tr>
 <tr><td>URL</td><td><a href="{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}">{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}</a></td></td></tr>
-<tr><td>decrypt</td><td><a hreft="" onclick="decrypt('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}/');">click here to decrypt this file</a></td>
+<tr><td>decrypt</td><td><a hreft="void(0)" onclick="downloader.start('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}/', '{{ bigfile.name }}');">click here to decrypt this file</a></td>
 </table>
+
+
 
 <h3>Downloaders</h3>
 {% if bigfile.downloaders %}

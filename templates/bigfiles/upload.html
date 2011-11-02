@@ -5,8 +5,9 @@
   <h2>File Upload</h2>
   
   <script src="{{ MEDIA_URL }}js/sjcl.js" type="text/javascript"></script>
-  <script src="{{ MEDIA_URL }}js/upload.js" type="text/javascript"></script>
   <script src="{{ MEDIA_URL }}js/BlobBuilder.js" type="text/javascript"></script>
+  <script src="{{ MEDIA_URL }}js/FormCrypt.js" type="text/javascript"></script>
+
 
   <form id="upload_javascript" enctype="multipart/form-data" method="post" action="/bigfiles/upload/">
      {% csrf_token %}
@@ -57,7 +58,7 @@
             <td><input type="text" name="key" id="id_key" value="password"/></td>
         </tr>
         <tr><td></td><td>
-            <input type="button" onclick="upload.start()" value="Upload" />
+            <input type="button" onclick="uploader.start()" value="Upload" />
         </td></tr>
     </table>
     
