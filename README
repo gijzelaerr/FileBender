@@ -30,3 +30,10 @@ for saml:
 * pip install httplib2
 
 * pip install decorator
+
+
+CREDITS
+=======
+
+This project uses:
+ * Stanford Javascript Crypto Library http://crypto.stanford.edu/sjcl/
