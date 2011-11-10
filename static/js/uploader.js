@@ -51,13 +51,13 @@ uploader.reset = function() {
  *
  */
 uploader.selected = function() {
-	uploader.file = document.getElementById('id_file').files[0];
+    uploader.file = document.getElementById('id_file').files[0];
 
-	if(uploader.file) {
-		document.getElementById('fileName').innerHTML = 'Name: ' + uploader.file.name;
-		document.getElementById('fileSize').innerHTML = 'Size: ' + formatSize(uploader.file.size);
-		document.getElementById('fileType').innerHTML = 'Type: ' + uploader.file.type;
-	}
+    if(uploader.file) {
+        document.getElementById('fileName').innerHTML = 'Name: ' + uploader.file.name;
+        document.getElementById('fileSize').innerHTML = 'Size: ' + formatSize(uploader.file.size);
+        document.getElementById('fileType').innerHTML = 'Type: ' + uploader.file.type;
+    }
 }
 
 
@@ -68,15 +68,15 @@ uploader.selected = function() {
 uploader.start = function() {
     uploader.selected();
 
-	if(!uploader.file) {
-	    alert("no file selected");
-	    return;
-	}
+    if(!uploader.file) {
+        alert("no file selected");
+        return;
+    }
 
     uploader.doCrypt = document.getElementById('id_docrypt').checked;
 
-	uploader.key = document.getElementById('id_key').value;
-	uploader.state = uploader.states.STARTED;
+    uploader.key = document.getElementById('id_key').value;
+    uploader.state = uploader.states.STARTED;
     uploader.nextChunk();
 }
 
@@ -138,13 +138,13 @@ uploader.uploadChunk = function() {
     fd.append("csrfmiddlewaretoken",
         document.getElementsByName('csrfmiddlewaretoken')[0].value);
 
-    if(uploader.fileid)
+    if(uploader.fileid) {
         xhr.open("POST", "/bigfiles/append.json/" + uploader.fileid + "/");
-    else
+    } else {
         xhr.open("POST", "/bigfiles/upload.json/");
+    }
 
-
-	xhr.send(fd);
+    xhr.send(fd);
 }
 
 
@@ -154,12 +154,12 @@ uploader.uploadChunk = function() {
  */
 uploader.uploadProgress = function(evt) {
     var newPercent = "??";
-	if(evt.lengthComputable) {
-		var percentComplete = Math.round((evt.loaded + uploader.completed - uploader.chunkSize) * 100 /
-		                                                  uploader.file.size);
-		newPercent = percentComplete.toString() + '%';
-	}
-	document.getElementById('progressNumber').innerHTML = newPercent;
+    if(evt.lengthComputable) {
+        var percentComplete = Math.round((evt.loaded + uploader.completed - uploader.chunkSize) * 100 /
+                                                          uploader.file.size);
+        newPercent = percentComplete.toString() + '%';
+    }
+    document.getElementById('progressNumber').innerHTML = newPercent;
 }
 
 
@@ -169,7 +169,7 @@ uploader.uploadProgress = function(evt) {
  */
 uploader.uploadComplete = function(evt) {
     // todo: check server http code
-	try {
+    try {
         var response = JSON.parse(evt.target.responseText);
     }catch(e) {
         alert("can't parse server response, upload failed");
@@ -177,13 +177,13 @@ uploader.uploadComplete = function(evt) {
         return;
     }
 
-	if(!uploader.fileid) {
-	    if (!response['fileid']) {
-	       alert("didnt receive a fileID after first chunk");
-	       return;
-	    }
-	    uploader.fileid = response['fileid'];
-	}
+    if(!uploader.fileid) {
+        if (!response['fileid']) {
+           alert("didnt receive a fileID after first chunk");
+           return;
+        }
+        uploader.fileid = response['fileid'];
+    }
 
     uploader.completed = uploader.completed + Math.min(chunkSize, uploader.file.size);
 
@@ -198,12 +198,12 @@ uploader.uploadComplete = function(evt) {
 
 
 uploader.uploadFailed = function(evt) {
-	alert("There was an error attempting to upload the file.");
+    alert("There was an error attempting to upload the file.");
 }
 
 
 uploader.uploadCanceled = function(evt) {
-	alert("The upload has been canceled by the user or the browser dropped the connection.");
+    alert("The upload has been canceled by the user or the browser dropped the connection.");
 }
 
 

@@ -27,7 +27,7 @@ StringBuffer.prototype = {
  */
 downloader = {
     xhr: new XMLHttpRequest(),
-	builder: new BlobBuilder(),
+    builder: new BlobBuilder(),
     crypted: null,
     plain: null,
     chunk: null,
@@ -39,9 +39,13 @@ downloader = {
 }
 
 
+/**
+ * Reset the complete download process
+ *
+ */
 downloader.reset = function() {
     this.xhr = new XMLHttpRequest();
-	this.builder = new BlobBuilder();
+    this.builder = new BlobBuilder();
     this.crypted = null;
     this.plain = null;
     this.chunk = null;
@@ -52,7 +56,7 @@ downloader.reset = function() {
 
 
 /**
- * Initialise the download. For now you need to specify the filename separately so we can
+ * Initialise the download. For now you need to specify the filename separately so we can use that for saving
  *
  */
 downloader.start = function(URI, filename) {
@@ -63,8 +67,8 @@ downloader.start = function(URI, filename) {
     this.xhr.addEventListener("load", this.complete, false);
     this.xhr.addEventListener("error", this.failed, false);
     this.xhr.addEventListener("abort", this.canceled, false);
-	this.xhr.open("GET", URI);
-	this.xhr.send();
+    this.xhr.open("GET", URI);
+    this.xhr.send();
 };
 
 
@@ -73,13 +77,17 @@ downloader.start = function(URI, filename) {
  *
  */
 downloader.complete = function (evt) {
-	//todo: check for server response errors etc
+    //todo: check for server response errors etc
     downloader.crypted = evt.target.response;
     this.completed = 0;
     downloader.nextChunk();
 };
 
 
+/**
+ * process the next chunk of data
+ *
+ */
 downloader.nextChunk = function() {
     var start = this.completed;
     var end = Math.min(downloader.crypted.length, this.completed + cryptLen(base64Len(chunkSize)));
@@ -97,12 +105,12 @@ downloader.nextChunk = function() {
         return;
     }
 
-	try {
-		this.plain = sjcl.decrypt(this.key, this.chunk);
-	} catch(e) {
-		alert("wrong key");
-		return;
-	}
+    try {
+        this.plain = sjcl.decrypt(this.key, this.chunk);
+    } catch(e) {
+        alert("wrong key");
+        return;
+    }
 
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs
@@ -132,8 +140,8 @@ downloader.nextChunk = function() {
 
 
 downloader.final = function() {
-	var blob = this.builder.getBlob(this.mimeString);
-	saveAs(blob, this.filename);
+    var blob = this.builder.getBlob(this.mimeString);
+    saveAs(blob, this.filename);
 };
 
 
@@ -151,12 +159,12 @@ downloader.progress = function (evt) {
 
 
 downloader.failed = function(evt) {
-	alert("There was an error attempting to download the file.");
+    alert("There was an error attempting to download the file.");
 };
 
 
 downloader.canceled = function(evt) {
-	alert("The upload has been canceled by the user or the browser dropped the connection.");
+    alert("The upload has been canceled by the user or the browser dropped the connection.");
 };
 
 
