@@ -5,7 +5,6 @@
  */
 uploader = {
     completed: 0,
-
     file: null,
     type: null,
     reader: null,
@@ -14,16 +13,9 @@ uploader = {
     cryptBlob: null,
     fileid: null,
     key: null,
-    cryptBlobBuilder: null,
-
-    states: {
-        READY: 'ready',
-        STARTED: 'started',
-        PROGRESS: 'progress',
-        COMPLETE: 'complete',
-        ABORT: 'abort',
-        ERROR: 'error'
-    }
+    builder: null,
+    doCrypt: true,
+    cryptWorker: null
 };
 
 
@@ -41,8 +33,7 @@ uploader.reset = function() {
     uploader.cryptBlob = null;
     uploader.fileid = null;
     uploader.key = null;
-    uploader.blobBuilder = null;
-    uploader.state = uploader.states.READY;
+    uploader.builder = null;
 }
 
 
@@ -73,11 +64,17 @@ uploader.start = function() {
         return;
     }
 
-    uploader.doCrypt = document.getElementById('id_docrypt').checked;
+    uploader.worker = new Worker("/media/js/crypter.js");
+    uploader.worker.onmessage = uploader.workerResponse;
 
+    uploader.doCrypt = document.getElementById('id_docrypt').checked;
     uploader.key = document.getElementById('id_key').value;
-    uploader.state = uploader.states.STARTED;
     uploader.nextChunk();
+}
+
+
+uploader.workerResponse = function(e) {
+    console.log(e.data);
 }
 
 
@@ -92,14 +89,17 @@ uploader.nextChunk = function() {
     uploader.slice = uploader.file.slice(start, end);
 
     if (uploader.doCrypt) {
-        uploader.reader = new FileReader();
+
+        uploader.worker.postMessage({'key': uploader.key, 'data': uploader.slice});
+        
+        /* uploader.reader = new FileReader();
         uploader.reader.onerror = function(e) { alert(e) };
         uploader.reader.readAsDataURL(uploader.slice);
 
         uploader.reader.onload = function(FREvent) {
             uploader.plainChunk = FREvent.target.result;
             uploader.encryptChunk();
-        }
+        } */
     } else {
         uploader.cryptBlob = uploader.slice;
         uploader.uploadChunk();
@@ -113,9 +113,9 @@ uploader.nextChunk = function() {
  */
 uploader.encryptChunk = function() {
     uploader.cryptChunk = sjcl.encrypt(uploader.key, uploader.plainChunk);
-    uploader.cryptBlobBuilder = new BlobBuilder();
-    uploader.cryptBlobBuilder.append(uploader.cryptChunk);
-    uploader.cryptBlob = uploader.cryptBlobBuilder.getBlob();
+    uploader.builder = new BlobBuilder();
+    uploader.builder.append(uploader.cryptChunk);
+    uploader.cryptBlob = uploader.builder.getBlob();
     uploader.uploadChunk();
 }
 
@@ -155,8 +155,9 @@ uploader.uploadChunk = function() {
 uploader.uploadProgress = function(evt) {
     var newPercent = "??";
     if(evt.lengthComputable) {
-        var percentComplete = Math.round((evt.loaded + uploader.completed - uploader.chunkSize) * 100 /
-                                                          uploader.file.size);
+        var total = cryptLen(base64Len(uploader.file.size));
+        var progress = cryptLen(base64Len(uploader.completed)) + evt.loaded;
+        var percentComplete = Math.round((progress * 100 )/ total);
         newPercent = percentComplete.toString() + '%';
     }
     document.getElementById('progressNumber').innerHTML = newPercent;

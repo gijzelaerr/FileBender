@@ -30,8 +30,8 @@ for saml:
     * pip install decorator
 
 client:
-* Google Chrome 14+ OR
-* Mozilla Firefox 7+ OR
+* Google Chrome 13+ OR
+* Mozilla Firefox 6+ OR
 * Safari 6+ (probably, not yet released)
 * Internet Explorer 10+ (probably, not yet released)
 
@@ -50,6 +50,9 @@ This project uses:
 PERFORMANCE
 ===========
 
-Encryption speed at 5MB chunks with default crypt settings is about 1.3MB/s
-on a Intel 2500K met 16GB mem with Google Chrome.
+Encryption speed at 5MB chunks with default crypt settings is about 1.8MB/s
+on a Intel 2500K met 16GB mem with Google Chrome. Upload doesn't require
+a lot of memory, but download does. This is because the file needs to be
+reconstructed in memory. Maybe LocalStorage Javascript can solve this in the
+future.
 
