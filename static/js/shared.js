@@ -1,8 +1,8 @@
 
 // try to make things cross browser
 BlobBuilder = BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
-Blob.prototype.slice = Blob.prototype.mozSlice || Blob.prototype.webkitSlice;
-File.prototype.slice = File.prototype.mozSlice || File.prototype.webkitSlice;
+Blob.prototype.slice = Blob.prototype.mozSlice || Blob.prototype.webkitSlice || Blob.prototype.slice;
+File.prototype.slice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice;
 
 
 /**

@@ -12,24 +12,32 @@ client side file encryption.
 LICENSE
 =======
 All code in this repo is released under the conditions of the Apache License 2.0
+unless indicated infile otherwise.
 
 
 REQUIREMENTS
 ============
 
-* Django 1.2
+server:
+* Django 1.3
 
 for saml:
+    * python-saml2
+        * https://code.launchpad.net/~lgs/pysaml2/main
+        * http://code.google.com/p/django-saml2-sp/
+    * xmlsec1
+    * pip install httplib2
+    * pip install decorator
 
-* python-saml2
-    * https://code.launchpad.net/~lgs/pysaml2/main
-    * http://code.google.com/p/django-saml2-sp/
+client:
+* Google Chrome 14+ OR
+* Mozilla Firefox 7+ OR
+* Safari 6+ (probably, not yet released)
+* Internet Explorer 10+ (probably, not yet released)
 
-* xmlsec1
-
-* pip install httplib2
-
-* pip install decorator
+Not working:
+* Safari 5
+* Internet Explorer 9
 
 
 CREDITS
@@ -37,3 +45,11 @@ CREDITS
 
 This project uses:
  * Stanford Javascript Crypto Library http://crypto.stanford.edu/sjcl/
+
+
+PERFORMANCE
+===========
+
+Encryption speed at 5MB chunks with default crypt settings is about 1.3MB/s
+on a Intel 2500K met 16GB mem with Google Chrome.
+
