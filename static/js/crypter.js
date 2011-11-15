@@ -1,42 +1,39 @@
-importScripts('BlobBuilder.js');
 importScripts('sjcl.js');
 
-
-var plainBlob = null;
-var cryptBlob = null;
-var builder = new self.BlobBuilder();
 var key = null;
 var plainChunk = null;
 var cryptChunk = null;
-var reader = new self.FileReader;
 
 
-reader.onerror = function(e) {
-    postMessage({'status': 'error', 'message':e});
-};
-
-
-reader.onload = function(FREvent) {
-    plainChunk = FREvent.target.result;
+self.onmessage = function(event) {
+    debug("message received");
+    plainChunk = event.data['data'];
+    key = event.data['key'];
     doCrypt();
 };
 
 
 function doCrypt() {
-    cryptChunk = sjcl.encrypt(key, plainChunk);
-    builder.append(cryptChunk);
-    cryptBlob = uploader.builder.getBlob();
+    debug("starting encryption");
+    try {
+        cryptChunk = sjcl.encrypt(key, plainChunk);
+    } catch(e) {
+        error("can't crypt: " + e.toString());
+        return;
+    };
     done();
-}
-
-
-function onmessage(e) {
-    plainBlob = e.data['data'];
-    key = e.data['key']
-    reader.readAsDataURL(plainBlob);
 };
 
-
 function done() {
-    postMessage({'status': 'ok', 'data':cryptBlob});
+    debug("encryption finished");
+    postMessage({'status': 'ok', 'data':cryptChunk});
 }
+
+
+function error(e) {
+    postMessage({'status': 'error', 'message':e});
+};
+
+function debug(e) {
+    postMessage({'status': 'debug', 'message':e});
+};

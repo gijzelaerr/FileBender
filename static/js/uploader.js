@@ -34,7 +34,7 @@ uploader.reset = function() {
     uploader.fileid = null;
     uploader.key = null;
     uploader.builder = null;
-}
+};
 
 
 /**
@@ -49,7 +49,16 @@ uploader.selected = function() {
         document.getElementById('fileSize').innerHTML = 'Size: ' + formatSize(uploader.file.size);
         document.getElementById('fileType').innerHTML = 'Type: ' + uploader.file.type;
     }
-}
+};
+
+
+/**
+ * Set status for user
+ *
+ */
+uploader.setStatus = function(status) {
+    document.getElementById('status').innerHTML = 'Status: ' + status;
+};
 
 
 /**
@@ -58,6 +67,7 @@ uploader.selected = function() {
  */
 uploader.start = function() {
     uploader.selected();
+    uploader.setStatus("Upload started");
 
     if(!uploader.file) {
         alert("no file selected");
@@ -70,12 +80,7 @@ uploader.start = function() {
     uploader.doCrypt = document.getElementById('id_docrypt').checked;
     uploader.key = document.getElementById('id_key').value;
     uploader.nextChunk();
-}
-
-
-uploader.workerResponse = function(e) {
-    console.log(e.data);
-}
+};
 
 
 /**
@@ -90,21 +95,23 @@ uploader.nextChunk = function() {
 
     if (uploader.doCrypt) {
 
-        uploader.worker.postMessage({'key': uploader.key, 'data': uploader.slice});
-        
-        /* uploader.reader = new FileReader();
-        uploader.reader.onerror = function(e) { alert(e) };
-        uploader.reader.readAsDataURL(uploader.slice);
+        uploader.reader = new FileReader();
+        uploader.reader.onerror = function(e) { console.log(e) };
 
+        uploader.setStatus("Reading file slice in memory");
+
+        // TODO: chrome and firefox prepend a different encoding string length
+        uploader.reader.readAsDataURL(uploader.slice);
+        
         uploader.reader.onload = function(FREvent) {
             uploader.plainChunk = FREvent.target.result;
             uploader.encryptChunk();
-        } */
+        } 
     } else {
         uploader.cryptBlob = uploader.slice;
         uploader.uploadChunk();
     }
-}
+};
 
 
 /**
@@ -112,12 +119,45 @@ uploader.nextChunk = function() {
  *
  */
 uploader.encryptChunk = function() {
-    uploader.cryptChunk = sjcl.encrypt(uploader.key, uploader.plainChunk);
+    uploader.setStatus("Encrypting file slice");
+    uploader.worker.postMessage({'key': uploader.key, 'data': uploader.plainChunk});
+};
+
+
+/**
+ * Called when the cryptWorker has something to say
+ *
+ */
+uploader.workerResponse = function(e) {
+    switch(e.data['status']) {
+        case 'ok':
+            uploader.cryptChunk = e.data['data'];
+            uploader.cryptFinished();
+            break;
+        case 'debug':
+            console.log("cryptWorker: " + e.data['message']);
+            break;
+        case 'error':
+            console.log("cryptWorker: " + e.data['message']);
+            break;
+        default:
+            console.log("cryptWorker: " + e.data.toString());
+            break;
+    };
+};
+
+
+/**
+ * Called when the cryptWorker is finished encrypting
+ *
+ */
+uploader.cryptFinished = function() {
+    uploader.setStatus("Blobifying crypted data");
     uploader.builder = new BlobBuilder();
     uploader.builder.append(uploader.cryptChunk);
     uploader.cryptBlob = uploader.builder.getBlob();
     uploader.uploadChunk();
-}
+};
 
 
 /**
@@ -125,6 +165,7 @@ uploader.encryptChunk = function() {
  *
  */
 uploader.uploadChunk = function() {
+    uploader.setStatus("Uploading file chunk");
     var xhr = new XMLHttpRequest();
     var fd = new FormData();
 
@@ -135,17 +176,16 @@ uploader.uploadChunk = function() {
 
     fd.append("file", uploader.cryptBlob);
     
-    fd.append("csrfmiddlewaretoken",
-        document.getElementsByName('csrfmiddlewaretoken')[0].value);
+    // needed for django cross site scripting prevention
+    fd.append("csrfmiddlewaretoken", document.getElementsByName('csrfmiddlewaretoken')[0].value);
 
     if(uploader.fileid) {
         xhr.open("POST", "/bigfiles/append.json/" + uploader.fileid + "/");
     } else {
         xhr.open("POST", "/bigfiles/upload.json/");
     }
-
     xhr.send(fd);
-}
+};
 
 
 /**
@@ -161,7 +201,7 @@ uploader.uploadProgress = function(evt) {
         newPercent = percentComplete.toString() + '%';
     }
     document.getElementById('progressNumber').innerHTML = newPercent;
-}
+};
 
 
 /**
@@ -191,21 +231,21 @@ uploader.uploadComplete = function(evt) {
     if(uploader.completed < uploader.file.size) {
         uploader.nextChunk();
     } else {
+        uploader.setStatus("done");
         alert("upload complete!");
         uploader.reset();
     }
-
-}
+};
 
 
 uploader.uploadFailed = function(evt) {
     alert("There was an error attempting to upload the file.");
-}
+};
 
 
 uploader.uploadCanceled = function(evt) {
     alert("The upload has been canceled by the user or the browser dropped the connection.");
-}
+};
 
 
 

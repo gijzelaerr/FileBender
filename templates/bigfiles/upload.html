@@ -24,11 +24,12 @@
                 <div id="fileName"></div>
                 <div id="fileSize"></div>
                 <div id="fileType"></div>
-                <div id="progressNumber"></div>         
+                <div id="status"></div>
+                <div id="progressNumber"></div>
             </td>
         </tr>
         <tr>
-            <td><label for="id_message">Receiver:</label></td>
+            <td><label for="id_receiver">Receiver:</label></td>
             <td>
                 {{ form.receiver.errors }}
                 {{ form.receiver }}
@@ -41,7 +42,7 @@
                 {{ form.message }}
             </td>
         </tr>
-        <tr><td><label for="id_message">Expire Date:</label></td>
+        <tr><td><label for="id_expire_date">Expire Date:</label></td>
             <td>
                 {{ form.expire_date.errors }}
                 {{ form.expire_date }}
