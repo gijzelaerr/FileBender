@@ -1,10 +1,20 @@
+/**
+ * This file should be run inside a WebWorker. It will encrypt a message in the background.
+ *
+ */
+
 importScripts('sjcl.js');
+
 
 var key = null;
 var plainChunk = null;
 var cryptChunk = null;
 
 
+/**
+ * Input from my master
+ *
+ */
 self.onmessage = function(event) {
     debug("message received");
     plainChunk = event.data['data'];
@@ -13,6 +23,10 @@ self.onmessage = function(event) {
 };
 
 
+/**
+ * Start encryption
+ *
+ */
 function doCrypt() {
     debug("starting encryption");
     try {
@@ -24,6 +38,10 @@ function doCrypt() {
     done();
 };
 
+/**
+ * Called when encryption is finished
+ *
+ */
 function done() {
     debug("encryption finished");
     postMessage({'status': 'ok', 'data':cryptChunk});
