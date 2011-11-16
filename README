@@ -38,6 +38,18 @@ client:
 Not working:
 * Safari 5
 * Internet Explorer 9
+* Opera (11.52/11.60)
+
+Not tested:
+* Opera
+
+notes:
+* Google Chrome 15 seems te be really slow while encrypting in a worker thread. This seems to be solved in the current
+  dev version (17).
+* There is a memory leak in Firefox (probably) in FileReader that inflates memory usage while encrypting.
+* Safari 5 can't slice blobs
+* Internet Explorer lacks the complete File API
+* Opera misses the XMLHttpRequest FormData stuff (XMLRequest level 2)
 
 
 CREDITS
