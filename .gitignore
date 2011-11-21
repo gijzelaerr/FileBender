@@ -1,2 +1,4 @@
 *.pyc
+database/sqlite3.db
+tools/*.dat
 
