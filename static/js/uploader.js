@@ -42,7 +42,9 @@ uploader.reset = function() {
  *
  */
 uploader.selected = function() {
-    uploader.file = document.getElementById('id_file').files[0];
+    //uploader.file = document.getElementById('id_file').files[0];
+    var files = document.getElementById('id_file').files;
+    uploader.file = files[0];
 
     if(uploader.file) {
         document.getElementById('fileName').innerHTML = 'Name: ' + uploader.file.name;
@@ -96,17 +98,37 @@ uploader.nextChunk = function() {
     if (uploader.doCrypt) {
 
         uploader.reader = new FileReader();
-        uploader.reader.onerror = function(e) { console.log(e) };
+        uploader.reader.onerror = function(e) {
+            var errorStr = "unknown";
+            switch(e.target.error.code) {
+                case 1:
+                    errorStr = "File not found";
+                    break;
+                case 2:
+                    errorStr = "Security error";
+                    break;
+                case 3:
+                    errorStr = "Aborted";
+                    break;
+                case 4:
+                    errorStr = "not readable";
+                    break;
+                case 5:
+                    errorStr = "Encoding error";
+                    break;
+            }
+            console.log("can't read file: "+ errorStr);
+        };
 
         uploader.setStatus("Reading file slice in memory");
 
         // TODO: chrome and firefox prepend a different encoding string length
         uploader.reader.readAsDataURL(uploader.slice);
-        
+
         uploader.reader.onload = function(FREvent) {
             uploader.plainChunk = FREvent.target.result;
             uploader.encryptChunk();
-        } 
+        }
     } else {
         uploader.cryptBlob = uploader.slice;
         uploader.uploadChunk();
@@ -175,7 +197,7 @@ uploader.uploadChunk = function() {
     xhr.addEventListener("abort", uploader.uploadCanceled, false);
 
     fd.append("file", uploader.cryptBlob);
-    
+
     // needed for django cross site scripting prevention
     fd.append("csrfmiddlewaretoken", document.getElementsByName('csrfmiddlewaretoken')[0].value);
 
