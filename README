@@ -40,9 +40,6 @@ Not working:
 * Internet Explorer 9
 * Opera (11.52/11.60)
 
-Not tested:
-* Opera
-
 notes:
 * Google Chrome 15 seems te be really slow while encrypting in a worker thread. This seems to be solved in the current
   dev version (17).

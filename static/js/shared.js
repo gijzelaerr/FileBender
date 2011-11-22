@@ -1,15 +1,5 @@
 
 
-// attempt to make this generic
-//Blob.prototype.slice = Blob.prototype.mozSlice || Blob.prototype.webkitSlice || Blob.prototype.slice;
-//File.prototype.slice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice;
-
-/**
- * Settings
- */
-var chunkSize = 5 * 1024 * 1024;
-
-
 /**
  * calculates base64 length given input length
  */
