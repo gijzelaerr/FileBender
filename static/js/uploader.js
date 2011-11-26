@@ -5,7 +5,9 @@
  */
 uploader = {
     file: null,
+    completed: 0,
     doCrypt: true,
+    slicer: new BlobSlicer(),
     cryptBlob: null,
     fileid: null,
     key: null,
@@ -45,15 +47,24 @@ uploader = {
             return;
         };
 
-        this.crypter = new FileCrypter();
+        this.crypter = new BlobCrypter();
 
         that = this;
-        this.crypter.onchunkready = function() {
+        this.crypter.oncrypt = function() {
             that.cryptBlob = this.cryptBlob;
             that.uploadChunk();
-        }
-        
-        this.crypter.crypt(this.file);
+        };
+
+        this.slicer.onslice = function() {
+            that.crypter.crypt(this.blobSlice);
+        };
+
+        this.slicer.onfinish = function() {
+            that.setStatus("done");
+            alert("upload complete!");
+        };
+
+        this.slicer.read(this.file);
     },
 
 
@@ -118,16 +129,6 @@ uploader = {
                return;
             }
             uploader.fileid = response['fileid'];
-        }
-
-        uploader.completed = uploader.completed + Math.min(chunkSize, uploader.file.size);
-
-        if(uploader.completed < uploader.file.size) {
-            uploader.nextChunk();
-        } else {
-            uploader.setStatus("done");
-            alert("upload complete!");
-            uploader.reset();
         }
     },
 

@@ -6,9 +6,9 @@
   
   <script src="{{ MEDIA_URL }}js/sjcl.js" type="text/javascript"></script>
   <script src="{{ MEDIA_URL }}js/shared.js" type="text/javascript"></script>
+  <script src="{{ MEDIA_URL }}js/BlobSlicer.js" type="text/javascript"></script>
+  <script src="{{ MEDIA_URL }}js/BlobCrypter.js" type="text/javascript"></script>
   <script src="{{ MEDIA_URL }}js/uploader.js" type="text/javascript"></script>
-  <script src="{{ MEDIA_URL }}js/FileCrypter.js" type="text/javascript"></script>
-
 
   <form id="upload_javascript" enctype="multipart/form-data" method="post" action="/bigfiles/upload/">
      {% csrf_token %}
