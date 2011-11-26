@@ -16,18 +16,21 @@
 <tr><td>Size</td><td>{{ bigfile.size|filesizeformat }}</td></tr>
 <tr><td>Message</td><td>{{ bigfile.message }}</td></tr>
 <tr><td>MD5</td><td>{{ bigfile.md5 }}</td></tr>
-<tr><td>URL</td><td><a href="{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}">{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}</a></td></td></tr>
-<tr><td>decrypt</td><td><a onclick="downloader.start('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}/', '{{ bigfile.name }}');">click here to decrypt this file</a></td>
 </table>
 
 
+<h2><a href="{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}">Download</a></h2>
+<h2><a onclick="downloader.start('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}/', '{{ bigfile.name }}');">click here to decrypt this file</a></h2>
 
-<h3>Downloaders</h3>
+
 {% if bigfile.downloaders %}
+<h3>Downloaders</h3>
     <table>
     <tr>
     {% for downloader in bigfile.downloaders.all %}
         <td>{{ downloader.email }}</td>
+    {% empty %}
+        <td>No downloaders specified</td>
     {% endfor %}
     </tr>
     </table>

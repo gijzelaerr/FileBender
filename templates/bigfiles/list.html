@@ -11,19 +11,19 @@
 
 
 
-    <table border="1">
+    <table>
     <tr>
-    <td><b>Direct Link</b></td>
-    <td><b>Download page</b></td>
-    <td><b>Upload date</b></td>
-    <td><b>Expire Date</b></td>
-    <td><b>MD5</b></td>
-    <td><b>Delete</b></td>
+    <td style="padding: 10px;"><h2>Direct Link</h2></td>
+    <td style="padding: 10px;"><h2>info</h2></td>
+    <td style="padding: 10px;"><h2>Upload</h2></td>
+    <td style="padding: 10px;"><h2>Expire</h2></td>
+    <td style="padding: 10px;"><h2>MD5</h2></td>
+    <td style="padding: 10px;"><h2>Delete</h2></td>
     </tr>
  	{% for bigfile in bigfiles %}
        <tr>
 	   <td><a href="{{ STORAGE_URL }}/{{ bigfile.secret }}/{{ bigfile.name }}">{{ bigfile.name }}</a></td>
-	   <td><a href="/bigfiles/download/{{ bigfile.id }}/{{ bigfile.secret }}/">download</a></td>
+	   <td><a href="/bigfiles/download/{{ bigfile.id }}/{{ bigfile.secret }}/">download page</a></td>
        <td>{{ bigfile.upload_date }}</td>
        <td>{{ bigfile.expire_date }}</td>
        <td>{{ bigfile.md5 }}</td>

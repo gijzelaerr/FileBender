@@ -1,8 +1,8 @@
 
 
 // attempt to make this generic
-//Blob.prototype.slice = Blob.prototype.mozSlice || Blob.prototype.webkitSlice || Blob.prototype.slice;
-//File.prototype.slice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice;
+Blob.prototype.slice = Blob.prototype.mozSlice || Blob.prototype.webkitSlice || Blob.prototype.slice;
+File.prototype.slice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice;
 
 /**
  * Settings
