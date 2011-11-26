@@ -33,7 +33,7 @@ def mailit(to, from_, message, url):
     send_mail('FileBender has a file for you!',
               body,
               'gijs@pythonic.nl',
-    to, fail_silently=True)
+    to, fail_silently=False)
     
 
 def handle_uploaded_file(filename, secret, filedata):

@@ -42,9 +42,7 @@ uploader.reset = function() {
  *
  */
 uploader.selected = function() {
-    //uploader.file = document.getElementById('id_file').files[0];
-    var files = document.getElementById('id_file').files;
-    uploader.file = files[0];
+    uploader.file = document.getElementById('id_file').files[0];
 
     if(uploader.file) {
         document.getElementById('fileName').innerHTML = 'Name: ' + uploader.file.name;
@@ -204,6 +202,8 @@ uploader.uploadChunk = function() {
     if(uploader.fileid) {
         xhr.open("POST", "/bigfiles/append.json/" + uploader.fileid + "/");
     } else {
+        fd.append("receiver", document.getElementsByName('receiver')[0].value);
+        fd.append("message", document.getElementsByName('message')[0].value);
         xhr.open("POST", "/bigfiles/upload.json/");
     }
     xhr.send(fd);
