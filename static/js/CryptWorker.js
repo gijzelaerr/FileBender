@@ -1,5 +1,4 @@
-/**
- * This file should be run inside a WebWorker. It will encrypt a message in the background.
+/** This file should be run inside a WebWorker. It will encrypt a message in the background.
  *
  */
 
@@ -11,20 +10,29 @@ var plainChunk = null;
 var cryptChunk = null;
 
 
-/**
- * Input from my master
+/** Input from my master
  *
  */
 self.onmessage = function(event) {
     debug("message received");
-    plainChunk = event.data['data'];
-    key = event.data['key'];
+    plainChunk = event.data['data'] || null;
+    key = event.data['key'] || null;
+
+    if (typeof(plainChunk) != "string" || (plainChunk.length = 0)) {
+        error("empty data received");
+        return;
+    };
+
+    if (typeof(key) != "string" || (key.length = 0)) {
+        error("empty key received");
+        return;
+    };
+
     doCrypt();
 };
 
 
-/**
- * Start encryption
+/** Start encryption
  *
  */
 function doCrypt() {
@@ -38,8 +46,8 @@ function doCrypt() {
     done();
 };
 
-/**
- * Called when encryption is finished
+
+/** Called when encryption is finished
  *
  */
 function done() {

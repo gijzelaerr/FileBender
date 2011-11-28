@@ -47,6 +47,7 @@ notes:
 * Safari 5 can't slice blobs
 * Internet Explorer lacks the complete File API
 * Opera misses the XMLHttpRequest FormData stuff (XMLRequest level 2)
+* Firefox 7 and 8 can't load a webworker from localhost, this is probably solved in ff9
 
 
 CREDITS

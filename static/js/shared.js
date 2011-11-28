@@ -1,4 +1,7 @@
 
+var BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
+var chunkSize = 1024*1024;
+
 
 /**
  * calculates base64 length given input length
