@@ -38,6 +38,26 @@ downloader.reset = function() {
  * Initialise the download. For now you need to specify the filename separately so we can use that for saving
  *
  */
+downloader.chrome = function(URI, filename, size) {
+    //this.key = prompt("Give key used for file encryption", "password");
+    this.filename = filename;
+    var fileStorage = new FileStorage(filename, size);
+
+    that = this;
+    fileStorage.onload = function() {
+        that.builder.append("gijs");
+        this.append(that.builder.getBlob());
+        this.append(that.builder.getBlob());
+        console.log(this.getUrl());
+        window.location = this.getUrl();
+    };
+};
+
+
+/**
+ * Initialise the download. For now you need to specify the filename separately so we can use that for saving
+ *
+ */
 downloader.start = function(URI, filename) {
     this.reset();
     this.key = prompt("Give key used for file encryption", "password");

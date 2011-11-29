@@ -99,6 +99,7 @@ uploader.uploadChunk = function() {
 
     var that = this;
 
+
     /** Called to update the upload progress indicator
      *
      */
@@ -114,25 +115,35 @@ uploader.uploadChunk = function() {
      *
      */
     xhr.addEventListener("load", function(evt) {
-            // todo: check server http code
-            try {
-                var response = JSON.parse(evt.target.responseText);
-            }catch(e) {
-                alert("can't parse server response, upload failed");
-                uploader.reset();
+        if (evt.target.status != 200) {
+            alert("server gave an error (" + evt.target.status + ")");
+        };
+
+        try {
+            var response = JSON.parse(evt.target.responseText);
+        }catch(e) {
+            alert("can't parse server response, upload failed");
+            that.reset();
+            return;
+        };
+
+        if (response['status'] == 'error') {
+            alert("server gave an error (" + response['message'] + ")");
+            that.reset();
+            return;
+        };
+
+        if(!that.fileid) {
+            if (!response['fileid']) {
+                alert("didnt receive a fileID after first chunk");
+                that.reset();
                 return;
-            }
+            };
+            that.fileid = response['fileid'];
+        };
 
-            if(!uploader.fileid) {
-                if (!response['fileid']) {
-                    alert("didnt receive a fileID after first chunk");
-                    return;
-                }
-                uploader.fileid = response['fileid'];
-            }
-
-            that._nextChunk();
-        }, false);
+        that._nextChunk();
+    }, false);
 
     xhr.addEventListener("error", function(evt) {
         alert("There was an error attempting to upload the file.");

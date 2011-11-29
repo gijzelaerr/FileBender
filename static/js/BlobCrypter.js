@@ -86,7 +86,13 @@ function BlobCrypter() {
  *  @private
  */
 BlobCrypter.prototype._encryptBlob = function() {
-        this.worker.postMessage({'key': this.key, 'data': this.plainText});
+
+    // asynchronous
+    //this.worker.postMessage({'key': this.key, 'data': this.plainText});
+
+    // synchronous
+    this.cryptText = sjcl.encrypt(this.key, this.plainText);
+    this._cryptFinished();
 };
 
 
