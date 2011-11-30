@@ -71,7 +71,7 @@ uploader.start = function() {
         that.uploadChunk();
     };
 
-    this.slicer = new BlobSlicer(this.file, 1024*1024);
+    this.slicer = new BlobSlicer(this.file, chunkSize);
 
     this._nextChunk();
 };

@@ -1,6 +1,6 @@
 
 var BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
-var chunkSize = 1024*1024;
+var chunkSize = 1 * 1024*1024;
 
 
 /**
