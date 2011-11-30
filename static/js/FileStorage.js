@@ -58,17 +58,15 @@ FileStorage.prototype._initFsApi = function() {
     var that = this;
     window.webkitStorageInfo.requestQuota(window.TEMPORARY, this.size, function(granted) {
         window.requestFileSystem(window.TEMPORARY, granted, function(fs) {
-            // bad hack to remove file if it exists
-            fs.root.getFile(that.fileName, {create: true, exclusive: false}, function(fileEntry) {
-                    fileEntry.remove(function() {
-                        console.log('File removed.');
-                    }, fileErrorHandler);
-                }, fileErrorHandler);
             fs.root.getFile(that.fileName, {create: true, exclusive: false}, function(fileEntry) {
                 that.fileEntry = fileEntry;
                 fileEntry.createWriter(function(fileWriter) {
+                    fileWriter.onwriteend = function(trunc) {
+                        that.onload();
+                    };
                     that.writer = fileWriter;
-                    that.onload();
+                    that.writer.seek(that.writer.length);
+                    that.writer.truncate(1);
                 }, fileErrorHandler);
             }, fileErrorHandler);
         }, fileErrorHandler);
@@ -85,14 +83,13 @@ FileStorage.prototype.append = function(data) {
 };
 
 
- FileStorage.prototype._appendFsApi = function(data) {
+FileStorage.prototype._appendFsApi = function(data) {
     var blobBuilder = new BlobBuilder();
     blobBuilder.append(data);
     var b = blobBuilder.getBlob();
-    this.writer.seek(this.completed);
     this.writer.write(b);
     this.completed = this.completed + b.size;
- };
+};
 
 
 FileStorage.prototype.getUrl = function() {

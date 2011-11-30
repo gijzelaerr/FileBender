@@ -20,7 +20,7 @@ Downloader = function() {
 
     this.xhr = new XMLHttpRequest();
 
-    that = this;
+    var that = this;
     this.xhr.addEventListener("progress", this.progress, false);
     this.xhr.addEventListener("load", function(evt) { that._requestComplete(evt)}, false);
     this.xhr.addEventListener("error", this.failed, false);
@@ -48,14 +48,14 @@ Downloader.prototype.start = function(fileUrl, filename, size) {
     this.key = prompt("Give key used for file encryption", "password");
 
     this.setStatus("starting download");
-    that.setProgress(0);
+    this.setProgress(0);
     this.fileUrl = fileUrl;
     this.filename = filename;
     this.size = size;
     this.completed = 0;
     this.fileStorage = new FileStorage();
 
-    that = this;
+    var that = this;
     this.fileStorage.onload = function() {
         that._nextDownload();
     };
@@ -88,8 +88,7 @@ Downloader.prototype._requestComplete = function (evt) {
             alert("unexpected response size, expected " + this.size + ",  received " + evt.target.response.length);
             return;
         };
-        this.ranged = false;
-        this.cryptChunk = evt.target.response;
+        this.crypted = evt.target.response;
         this._nextChunk();
 
     } else if (evt.target.status == 206) {
@@ -119,13 +118,13 @@ Downloader.prototype._requestComplete = function (evt) {
  */
 Downloader.prototype._nextChunk = function() {
     var start = this.completed;
-    var end = Math.min(this.completed + cryptLen(base64Len(chunkSize)), this.cryptChunk.length);
-    this.chunk = this.cryptChunk.slice(start, end);
+    var end = Math.min(this.completed + cryptLen(base64Len(chunkSize)), this.crypted.length);
+    this.cryptChunk = this.crypted.slice(start, end);
     this._decryptChunk();
 
     this.completed = this.end;
 
-    if(this.completed < this.cryptChunk.length) {
+    if(this.completed < this.crypted.length) {
         this._nextChunk();
     } else {
         this._final();
@@ -140,7 +139,7 @@ Downloader.prototype._decryptChunk = function () {
 
     this.setStatus("decrypting chunk");
     var percentComplete = Math.round(this.completed / this.size * 100);
-    that.setProgress(percentComplete);
+    this.setProgress(percentComplete);
 
     var final = this.cryptChunk.charAt(this.cryptChunk.length-1);
     if (final != "}") {
@@ -179,7 +178,7 @@ Downloader.prototype._decryptChunk = function () {
  */
 Downloader.prototype._final = function() {
     this.setStatus("download complete");
-    that.setProgress(100);
+    this.setProgress(100);
     //var blob = this.builder.getBlob(this.mimeString);
     //saveAs(blob, this.filename);
     window.location = this.fileStorage.getUrl();
