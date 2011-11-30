@@ -20,9 +20,10 @@
 
 
 <h2><a href="{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}">Download</a></h2>
-<h2><a onclick="downloader.start('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}/', '{{ bigfile.name }}');">click here to decrypt this file</a></h2>
-<h2><a onclick="downloader.chrome('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}/', '{{ bigfile.name }}', '{{bigfile.size}}');">chrome LocalStorage test</a></h2>
+<h2><a onclick="downloader.start('{{ STORAGE_URL }}{{ bigfile.secret }}/{{ bigfile.name }}', '{{ bigfile.name }}', '{{bigfile.size}}');">click here to decrypt this file</a></h2>
 
+<div id="status"></div>
+<div id="progressNumber"></div>
 
 {% if bigfile.downloaders %}
 <h3>Downloaders</h3>

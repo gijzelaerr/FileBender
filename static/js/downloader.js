@@ -1,169 +1,212 @@
 
 
-/**
- * The downloader object, used for the complete download process
+/** The downloader object, used for the complete download process
  *
  */
-downloader = {
-    xhr: new XMLHttpRequest(),
-    builder: new BlobBuilder(),
-    crypted: null,
-    plain: null,
-    chunk: null,
-    filename: null,
-    key: null,
-    completed: 0,
-    byteString: null,
-    mimeString: null
-}
-
-
-/**
- * Reset the complete download process
- *
- */
-downloader.reset = function() {
-    this.xhr = new XMLHttpRequest();
-    this.builder = new BlobBuilder();
+Downloader = function() {
     this.crypted = null;
-    this.plain = null;
-    this.chunk = null;
+    this.plainChunk = null;
+    this.cryptChunk = null;
     this.filename = null;
-    this.key = null;
+    this.fileUrl = null;
+    this.key  = null;
+
+    this.byteString = null;
+    this.mimeString = null;
+    this.chunkSize = chunkSize;
     this.completed = 0;
-}
+    this.ranged = true;
+    this.fileStorage = null;
 
-
-/**
- * Initialise the download. For now you need to specify the filename separately so we can use that for saving
- *
- */
-downloader.chrome = function(URI, filename, size) {
-    //this.key = prompt("Give key used for file encryption", "password");
-    this.filename = filename;
-    var fileStorage = new FileStorage(filename, size);
+    this.xhr = new XMLHttpRequest();
 
     that = this;
-    fileStorage.onload = function() {
-        that.builder.append("gijs");
-        this.append(that.builder.getBlob());
-        this.append(that.builder.getBlob());
-        console.log(this.getUrl());
-        window.location = this.getUrl();
-    };
+    this.xhr.addEventListener("progress", this.progress, false);
+    this.xhr.addEventListener("load", function(evt) { that._requestComplete(evt)}, false);
+    this.xhr.addEventListener("error", this.failed, false);
+    this.xhr.addEventListener("abort", this.canceled, false);
 };
 
 
-/**
- * Initialise the download. For now you need to specify the filename separately so we can use that for saving
+/** Set status for user
  *
  */
-downloader.start = function(URI, filename) {
-    this.reset();
+Downloader.prototype.setStatus = function(status) {
+    document.getElementById('status').innerHTML = 'Status: ' + status;
+};
+
+
+Downloader.prototype.setProgress = function(number) {
+    document.getElementById('progressNumber').innerHTML = "" + number + "%";
+};
+
+
+/** Initialise the download. For now you need to specify the filename separately so we can use that for saving
+ *
+ */
+Downloader.prototype.start = function(fileUrl, filename, size) {
     this.key = prompt("Give key used for file encryption", "password");
+
+    this.setStatus("starting download");
+    that.setProgress(0);
+    this.fileUrl = fileUrl;
     this.filename = filename;
-    this.xhr.addEventListener("progress", this.progress, false);
-    this.xhr.addEventListener("load", this.complete, false);
-    this.xhr.addEventListener("error", this.failed, false);
-    this.xhr.addEventListener("abort", this.canceled, false);
-    this.xhr.open("GET", URI);
+    this.size = size;
+    this.completed = 0;
+    this.fileStorage = new FileStorage();
+
+    that = this;
+    this.fileStorage.onload = function() {
+        that._nextDownload();
+    };
+
+    this.fileStorage.start(filename, size);
+};
+
+
+/** Download the next cryptChunk
+ *
+ */
+Downloader.prototype._nextDownload = function() {
+    this.setStatus("downloading chunk");
+    var start = this.completed;
+    var end = Math.min(this.completed + cryptLen(base64Len(this.chunkSize)), this.size);
+    this.xhr.open("GET", this.fileUrl);
+    this.xhr.setRequestHeader("Range", "bytes=" + start + "-" + (end-1));
     this.xhr.send();
 };
 
 
-/**
- * called when the file is completely downloaded
+
+/** called when the chunk is completely downloaded
  *
  */
-downloader.complete = function (evt) {
-    //todo: check for server response errors etc
-    downloader.crypted = evt.target.response;
-    this.completed = 0;
-    downloader.nextChunk();
+Downloader.prototype._requestComplete = function (evt) {
+    if (evt.target.status == 200) {
+        console.log("server doesn't support range request");
+        if (evt.target.response.length != this.size) {
+            alert("unexpected response size, expected " + this.size + ",  received " + evt.target.response.length);
+            return;
+        };
+        this.ranged = false;
+        this.cryptChunk = evt.target.response;
+        this._nextChunk();
+
+    } else if (evt.target.status == 206) {
+        var l = cryptLen(base64Len(this.chunkSize));
+        if (evt.target.response.length != l) {
+            alert("unexpected response size, expected " + l + ", received " + evt.target.response.length);
+            return;
+        };
+        this.cryptChunk = evt.target.response;
+        this._decryptChunk();
+        this.completed = Math.min(this.completed + cryptLen(base64Len(this.chunkSize)), this.size);
+        if(this.completed < this.size) {
+            this._nextDownload();
+        } else {
+            this._final();
+        };
+
+    } else {
+        alert("server gave an error (" + evt.target.status + ")");
+        return;
+    };
 };
 
 
-/**
- * process the next chunk of data
+/** Process blob in chunked, used when the HTTP server doesn't support Range
  *
  */
-downloader.nextChunk = function() {
+Downloader.prototype._nextChunk = function() {
     var start = this.completed;
-    var end = Math.min(downloader.crypted.length, this.completed + cryptLen(base64Len(chunkSize)));
+    var end = Math.min(this.completed + cryptLen(base64Len(chunkSize)), this.cryptChunk.length);
+    this.chunk = this.cryptChunk.slice(start, end);
+    this._decryptChunk();
 
-    if (this.crypted.length == end && start == 0) {
-        // don't slice if not chunked
-        this.chunk = this.crypted;
-    } else{
-        this.chunk = this.crypted.slice(start, end);
-    }
+    this.completed = this.end;
 
-    var final = this.chunk.charAt(this.chunk.length-1);
+    if(this.completed < this.cryptChunk.length) {
+        this._nextChunk();
+    } else {
+        this._final();
+    };
+};
+
+
+/** Decrypt a chunk
+ *
+ */
+Downloader.prototype._decryptChunk = function () {
+
+    this.setStatus("decrypting chunk");
+    var percentComplete = Math.round(this.completed / this.size * 100);
+    that.setProgress(percentComplete);
+
+    var final = this.cryptChunk.charAt(this.cryptChunk.length-1);
     if (final != "}") {
         alert("alignment problem, check chunkSize");
         return;
     }
 
     try {
-        this.plain = sjcl.decrypt(this.key, this.chunk);
+        this.plainChunk = sjcl.decrypt(this.key, this.cryptChunk);
     } catch(e) {
         alert("wrong key");
         return;
-    }
+    };
 
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs
-    this.byteString = atob(this.plain.split(',')[1]);
+    this.byteString = atob(this.plainChunk.split(',')[1]);
 
     // separate out the mime component
-    this.mimeString = this.plain.split(',')[0].split(':')[1].split(';')[0];
+    this.mimeString = this.plainChunk.split(',')[0].split(':')[1].split(';')[0];
 
     // write the bytes of the string to an ArrayBuffer
     var ab = new ArrayBuffer(this.byteString.length);
     var ia = new Uint8Array(ab);
     for (var i = 0; i < this.byteString.length; i++) {
         ia[i] = this.byteString.charCodeAt(i);
-    }
+    };
 
     // write the ArrayBuffer to a blob, and you're done
-    this.builder.append(ab);
-
-    this.completed = this.completed + Math.min(cryptLen(base64Len(chunkSize)), this.crypted.length);
-
-    if(this.completed < this.crypted.length) {
-        this.nextChunk();
-    } else {
-        this.final();
-    }
-};
-
-
-downloader.final = function() {
-    var blob = this.builder.getBlob(this.mimeString);
-    saveAs(blob, this.filename);
+    this.fileStorage.append(ab);
 };
 
 
 /**
- * called to update the progress indicator
  *
  */
-downloader.progress = function (evt) {
+Downloader.prototype._final = function() {
+    this.setStatus("download complete");
+    that.setProgress(100);
+    //var blob = this.builder.getBlob(this.mimeString);
+    //saveAs(blob, this.filename);
+    window.location = this.fileStorage.getUrl();
+};
+
+
+/** called to update the progress indicator
+ *
+ */
+Downloader.progress = function (evt) {
     if (evt.lengthComputable) {
         var percentComplete = evt.loaded / evt.total;
     } else {
         pass;
-    }
+    };
 };
 
 
-downloader.failed = function(evt) {
+Downloader.failed = function(evt) {
     alert("There was an error attempting to download the file.");
 };
 
 
-downloader.canceled = function(evt) {
+Downloader.canceled = function(evt) {
     alert("The upload has been canceled by the user or the browser dropped the connection.");
 };
 
 
+
+var downloader = new Downloader();

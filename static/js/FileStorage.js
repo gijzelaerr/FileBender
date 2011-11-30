@@ -1,5 +1,9 @@
 
 
+self.BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
+window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+
+
 function fileErrorHandler(e) {
     var msg = '';
 
@@ -28,56 +32,75 @@ function fileErrorHandler(e) {
 };
 
 
-function FileStorage(fileName, size) {
-
-    this.fs = null;
-    this.fileName = fileName;
-    this.size = size;
+function FileStorage() {
     this.writer = null;
     this.fileEntry = null;
+    this.useFileSystemApi = false;
+    this.blobBuilder = null;
+    this.completed = 0;
+};
 
-    window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
 
+FileStorage.prototype.start = function(fileName, size) {
+    this.fileName = fileName;
+    this.size = size;
+
+    if (window.requestFileSystem) {
+        this.useFileSystemApi = true;
+        this._initFsApi();
+    } else {
+        this.blobBuilder = new BlobBuilder();
+    };
+};
+
+
+FileStorage.prototype._initFsApi = function() {
     var that = this;
-
-    window.webkitStorageInfo.requestQuota(window.TEMPORARY, size, function(granted) {
-        console.log("we have quota");
+    window.webkitStorageInfo.requestQuota(window.TEMPORARY, this.size, function(granted) {
         window.requestFileSystem(window.TEMPORARY, granted, function(fs) {
-            console.log("we have filesystem");
-            fs.root.getFile(that.fileName, {create: false, exclusive: false}, function(fileEntry) {
-                    console.log("we have file");
-                    that.fileEntry = fileEntry;
-                    fileEntry.createWriter(function(fileWriter) {
-                        console.log("we have fileEntry");
-                        that.writer = fileWriter;
-                        that.onload();
-                    });
+            // bad hack to remove file if it exists
+            fs.root.getFile(that.fileName, {create: true, exclusive: false}, function(fileEntry) {
+                    fileEntry.remove(function() {
+                        console.log('File removed.');
+                    }, fileErrorHandler);
                 }, fileErrorHandler);
+            fs.root.getFile(that.fileName, {create: true, exclusive: false}, function(fileEntry) {
+                that.fileEntry = fileEntry;
+                fileEntry.createWriter(function(fileWriter) {
+                    that.writer = fileWriter;
+                    that.onload();
+                }, fileErrorHandler);
+            }, fileErrorHandler);
         }, fileErrorHandler);
     }, fileErrorHandler);
 };
 
 
- FileStorage.prototype.append = function(blob) {
-    if (!this.writer) {
-        console.log("fileStorage not initialised correctly");
-        return;
-    };
-
-    if (this.writer.length > 0) {
-        this.writer.seek(this.fileWriter.length);
-        this.writer.write(blob);
+FileStorage.prototype.append = function(data) {
+    if (this.useFileSystemApi) {
+        this._appendFsApi(data);
+    } else {
+        this.blobBuilder.append(data);
     };
 };
 
 
-FileStorage.prototype.getUrl = function() {
-    if (!this.fileEntry) {
-        console.log("fileStorage not initialised correctly");
-        return;
-    };
+ FileStorage.prototype._appendFsApi = function(data) {
+    var blobBuilder = new BlobBuilder();
+    blobBuilder.append(data);
+    var b = blobBuilder.getBlob();
+    this.writer.seek(this.completed);
+    this.writer.write(b);
+    this.completed = this.completed + b.size;
+ };
 
-    return this.fileEntry.toURL();
+
+FileStorage.prototype.getUrl = function() {
+    if (this.useFileSystemApi) {
+        return this.fileEntry.toURL();
+    } else {
+        return this.blobBuilder.getBlob().toURL();
+    };
 };
 
 

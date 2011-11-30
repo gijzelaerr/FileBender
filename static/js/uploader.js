@@ -82,9 +82,9 @@ uploader._nextChunk = function() {
         this.setStatus("encrypting chunk");
         this.crypter.crypt(this.slicer.blobSlice, this.key);
     } else {
-        alert("upload complete!");
-        status("upload complete!");
+        this.setStatus("upload complete!");
         this.setProgress(100);
+        alert("upload complete!");
     }
 };
 
@@ -117,6 +117,7 @@ uploader.uploadChunk = function() {
     xhr.addEventListener("load", function(evt) {
         if (evt.target.status != 200) {
             alert("server gave an error (" + evt.target.status + ")");
+            return;
         };
 
         try {
