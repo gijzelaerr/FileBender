@@ -7,7 +7,7 @@ File.prototype.slice = File.prototype.mozSlice || File.prototype.webkitSlice || 
 /**
  * Settings
  */
-var chunkSize = 5 * 1024 * 1024;
+var chunkSize = 1 * 1024 * 1024;
 
 
 /**
