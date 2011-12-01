@@ -12,20 +12,29 @@ What do we want
 
 
 
+
+
+
+
+
+
+
 Implementation
 ==============
 
 * Standard form file upload
-* AES (64, 96, 128 bit) with random salt
+* AES with 128, 192 or 256 key size
+* with random salt
+
 
 Upload:
 * Read a file (File API, not in IE9)
 * Slice a file (File.slice)
 * Encode slice BASE64
 * Encrypt slice (SJCL)
-* Make a blob from crypted slice (BlobBuilder, not in Safari5)
+* Make a blob from encrypted slice (BlobBuilder, not in Safari5)
 * Store blob into temporary local filesystem so we can name Blob (chrome 9+ only)
-* Upload each crypted slice
+* Upload each encrypted slice
 * Data concatenated server side
 
 Download:
@@ -38,6 +47,8 @@ Download:
 
 Threading:
 * Make non blocking using Web Workers
+
+
 
 
 
@@ -56,11 +67,18 @@ Not working:
 * Firefox 8, somehow the webwokers stopped working.
 
 
+Last point is example of the HTML5 virginity.
+
+
+
+
+
+
 Conclusion
 ==========
 
 * Cutting edge technology
-* API's in development, not fully implented or may change - Will need some love in the future!
+* API's in development, not fully implemented or may change - Will need some love in the future!
 * Will only work completely in Google Chrome
 * Can work but less good with Firefox
 * Small flash tool can help
@@ -72,4 +90,6 @@ Conclusion
 Future Work
 ===========
 
-* Google chrome extention for generic form encryption?
+* Different crypto lib
+* Google chrome extension for generic form encryption?
+* Firefox extension to implement missing functionality a option, but a lot of work (out of scope)
