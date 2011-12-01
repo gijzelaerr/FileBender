@@ -1,0 +1,60 @@
+
+What do we want
+===============
+
+* File upload encryption, before leaving the computer
+* Secure transmission and storage
+* File only readable by end user
+* Chunking / resuming
+* No 3rd party software or plugins
+
+
+
+
+
+Implementation
+==============
+
+* Standard form file upload
+* AES (64, 96, 128 bit) with random salt
+
+Upload:
+* Read a file (File API, not in IE9)
+* Slice a file (File.slice)
+* Encode slice BASE64
+* Encrypt slice (SJCL)
+* Make a blob from crypted slice (BlobBuilder, not in Safari5)
+* Store blob into temporary local filesystem so we can name Blob (chrome 9+ only)
+* Upload each crypted slice
+* Data concatenated server side
+
+Download:
+* Normal file download
+* If HTTP server support Range, chunked download, else sliced
+* Each chunk is decrypted
+* Concatenated in temporary local filesystem (chrome only)
+* If no temp local FS, BlobBuilder (mem usage 3x file size)
+* File is offered to user
+
+Threading:
+* Make non blocking using Web Workers
+
+
+
+Conclusion
+==========
+
+* Cutting edge technology
+* API's in development, not fully implented or may change - Will need some love in the future!
+* Will only work completely in Google Chrome
+* Can work but less good with Firefox
+* Small flash tool can help
+* Debugging is hard, no webworker debug tools
+* limited documentation
+
+
+
+Future Work
+===========
+
+* Google chrome extention for generic form encryption?
