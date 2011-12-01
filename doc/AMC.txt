@@ -41,6 +41,21 @@ Threading:
 
 
 
+Supported browsers
+==================
+
+* Google Chrome 13+ OR
+* Mozilla Firefox 6+ OR
+* Maybe Safari 6+ (not yet released)
+* Maybe Internet Explorer 10+ (not yet released)
+
+Not working:
+* Safari 5
+* Internet Explorer 9
+* Opera (11.52/11.60)
+* Firefox 8, somehow the webwokers stopped working.
+
+
 Conclusion
 ==========
 
