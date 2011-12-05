@@ -122,7 +122,7 @@ Downloader.prototype._nextChunk = function() {
     this.cryptChunk = this.crypted.slice(start, end);
     this._decryptChunk();
 
-    this.completed = this.end;
+    this.completed = end;
 
     if(this.completed < this.crypted.length) {
         this._nextChunk();

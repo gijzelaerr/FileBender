@@ -33,8 +33,9 @@ function fileErrorHandler(e) {
 
 
 function FileStorage() {
-    this.writer = null;
+    this.fileWriter = null;
     this.fileEntry = null;
+    this.fs = null;
     this.useFileSystemApi = false;
     this.blobBuilder = null;
     this.completed = 0;
@@ -58,19 +59,36 @@ FileStorage.prototype._initFsApi = function() {
     var that = this;
     window.webkitStorageInfo.requestQuota(window.TEMPORARY, this.size, function(granted) {
         window.requestFileSystem(window.TEMPORARY, granted, function(fs) {
-            fs.root.getFile(that.fileName, {create: true, exclusive: false}, function(fileEntry) {
-                that.fileEntry = fileEntry;
-                fileEntry.createWriter(function(fileWriter) {
-                    fileWriter.onwriteend = function(trunc) {
-                        that.onload();
-                    };
-                    that.writer = fileWriter;
-                    that.writer.seek(that.writer.length);
-                    that.writer.truncate(1);
-                }, fileErrorHandler);
-            }, fileErrorHandler);
+            that.fs = fs;
+            fs.root.getFile(that.fileName, {create: false, exclusive: false}, function(fileEntry) {
+                console.log("removing old file");
+                fileEntry.remove(that._makeFileWriter, fileErrorHandler);
+                }, function() {
+                    console.log("file doesn't exists yet, don't remove");
+                    that._makeFileWriter();
+                }
+            );
         }, fileErrorHandler);
     }, fileErrorHandler);
+};
+
+
+FileStorage.prototype._makeFileWriter = function() {
+    var that = this;
+    try {
+        this.fs.root.getFile(this.fileName, {create: true, exclusive: false}, function(fileEntry) {
+            that.fileEntry = fileEntry;
+            fileEntry.createWriter(function(fileWriter) {
+                fileWriter.onwriteend = function(trunc) {
+                    that.onload();
+                };
+                that.writer = fileWriter;
+            }, fileErrorHandler);
+        }, fileErrorHandler);
+    } catch(e) {
+      console.log("wtf");
+    };
+
 };
 
 
@@ -87,7 +105,7 @@ FileStorage.prototype._appendFsApi = function(data) {
     var blobBuilder = new BlobBuilder();
     blobBuilder.append(data);
     var b = blobBuilder.getBlob();
-    this.writer.write(b);
+    this.fileWriter.write(b);
     this.completed = this.completed + b.size;
 };
 
