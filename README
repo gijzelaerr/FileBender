@@ -55,7 +55,9 @@ CREDITS
 =======
 
 This project uses:
+ * Django
  * Stanford Javascript Crypto Library http://crypto.stanford.edu/sjcl/
+ * Downloadify (https://github.com/dcneiner/Downloadify)
 
 
 PERFORMANCE
