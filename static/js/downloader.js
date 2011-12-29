@@ -5,17 +5,16 @@
  */
 Downloader = function() {
     this.crypted = null;
+    this.base64Chunk = null;
     this.plainChunk = null;
     this.cryptChunk = null;
-    this.filename = null;
     this.fileUrl = null;
     this.key  = null;
+    this.useRange = true;
 
     this.byteString = null;
-    this.mimeString = null;
     this.chunkSize = chunkSize;
     this.completed = 0;
-    this.ranged = true;
     this.fileStorage = null;
 
     this.xhr = new XMLHttpRequest();
@@ -50,21 +49,35 @@ Downloader.prototype.start = function(fileUrl, filename, size) {
     this.setStatus("starting download");
     this.setProgress(0);
     this.fileUrl = fileUrl;
-    this.filename = filename;
+    this.filename = filename.slice(0,-8); // remove .crypted postfix
     this.size = size;
     this.completed = 0;
     this.fileStorage = new FileStorage();
 
     var that = this;
-    this.fileStorage.onload = function() {
-        that._nextDownload();
+    this.fileStorage.ready = function() {
+        that._writerReady();
     };
 
-    this.fileStorage.start(filename, size);
+    this.fileStorage.start(this.filename, size);
 };
 
+/** called when the file storage is ready for some action
+ *
+ */
+Downloader.prototype._writerReady = function() {
+    if(this.completed < this.size) {
+        if(this.useRange) {
+            this._nextDownload();
+        } else {
+            this._nextChunk();
+        };
+    } else {
+        this._final();
+    };
+};
 
-/** Download the next cryptChunk
+/** Download the next chunk from the server
  *
  */
 Downloader.prototype._nextDownload = function() {
@@ -84,6 +97,7 @@ Downloader.prototype._nextDownload = function() {
 Downloader.prototype._requestComplete = function (evt) {
     if (evt.target.status == 200) {
         console.log("server doesn't support range request");
+        this.useRange = false;
         if (evt.target.response.length != this.size) {
             alert("unexpected response size, expected " + this.size + ",  received " + evt.target.response.length);
             return;
@@ -92,6 +106,7 @@ Downloader.prototype._requestComplete = function (evt) {
         this._nextChunk();
 
     } else if (evt.target.status == 206) {
+        this.useRange = true;
         var l = cryptLen(base64Len(this.chunkSize));
         if (evt.target.response.length != l) {
             alert("unexpected response size, expected " + l + ", received " + evt.target.response.length);
@@ -100,17 +115,13 @@ Downloader.prototype._requestComplete = function (evt) {
         this.cryptChunk = evt.target.response;
         this._decryptChunk();
         this.completed = Math.min(this.completed + cryptLen(base64Len(this.chunkSize)), this.size);
-        if(this.completed < this.size) {
-            this._nextDownload();
-        } else {
-            this._final();
-        };
-
+        this.fileStorage.append(this.plainChunk);
     } else {
         alert("server gave an error (" + evt.target.status + ")");
         return;
     };
 };
+
 
 
 /** Process blob in chunked, used when the HTTP server doesn't support Range
@@ -121,14 +132,8 @@ Downloader.prototype._nextChunk = function() {
     var end = Math.min(this.completed + cryptLen(base64Len(chunkSize)), this.crypted.length);
     this.cryptChunk = this.crypted.slice(start, end);
     this._decryptChunk();
-
     this.completed = end;
-
-    if(this.completed < this.crypted.length) {
-        this._nextChunk();
-    } else {
-        this._final();
-    };
+    this.fileStorage.append(this.plainChunk);
 };
 
 
@@ -148,7 +153,7 @@ Downloader.prototype._decryptChunk = function () {
     }
 
     try {
-        this.plainChunk = sjcl.decrypt(this.key, this.cryptChunk);
+        this.base64Chunk = sjcl.decrypt(this.key, this.cryptChunk);
     } catch(e) {
         alert("wrong key");
         return;
@@ -156,20 +161,14 @@ Downloader.prototype._decryptChunk = function () {
 
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs
-    this.byteString = atob(this.plainChunk.split(',')[1]);
-
-    // separate out the mime component
-    this.mimeString = this.plainChunk.split(',')[0].split(':')[1].split(';')[0];
+    this.byteString = atob(this.base64Chunk);
 
     // write the bytes of the string to an ArrayBuffer
-    var ab = new ArrayBuffer(this.byteString.length);
-    var ia = new Uint8Array(ab);
+    this.plainChunk = new ArrayBuffer(this.byteString.length);
+    var ia = new Uint8Array(this.plainChunk);
     for (var i = 0; i < this.byteString.length; i++) {
         ia[i] = this.byteString.charCodeAt(i);
     };
-
-    // write the ArrayBuffer to a blob, and you're done
-    this.fileStorage.append(ab);
 };
 
 
@@ -179,9 +178,28 @@ Downloader.prototype._decryptChunk = function () {
 Downloader.prototype._final = function() {
     this.setStatus("download complete");
     this.setProgress(100);
-    //var blob = this.builder.getBlob(this.mimeString);
-    //saveAs(blob, this.filename);
     window.location = this.fileStorage.getUrl();
+
+
+    /*
+    Downloadify.create('downloadify',{
+        filename: function(){
+            return this.filename;
+        },
+        data: function(){
+            return this.fileStorage.getUrl();
+        },
+        onComplete: function(){ alert('Your File Has Been Saved!'); },
+        onCancel: function(){ alert('You have cancelled the saving of this file.'); },
+        onError: function(){ alert('You must put something in the File Contents or there will be nothing to save!'); },
+        swf: '/media/swf/downloadify.swf',
+        downloadImage: 'media/img/download.png',
+        width: 100,
+        height: 30,
+        transparent: true,
+        append: false
+    });
+    */
 };
 
 

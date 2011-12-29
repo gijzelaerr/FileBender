@@ -35,10 +35,8 @@ function fileErrorHandler(e) {
 function FileStorage() {
     this.fileWriter = null;
     this.fileEntry = null;
-    this.fs = null;
     this.useFileSystemApi = false;
     this.blobBuilder = null;
-    this.completed = 0;
 };
 
 
@@ -50,63 +48,68 @@ FileStorage.prototype.start = function(fileName, size) {
         this.useFileSystemApi = true;
         this._initFsApi();
     } else {
+        this.useFileSystemApi = false;
         this.blobBuilder = new BlobBuilder();
+        this.ready();
     };
 };
 
 
 FileStorage.prototype._initFsApi = function() {
     var that = this;
-    window.webkitStorageInfo.requestQuota(window.TEMPORARY, this.size, function(granted) {
-        window.requestFileSystem(window.TEMPORARY, granted, function(fs) {
-            that.fs = fs;
-            fs.root.getFile(that.fileName, {create: false, exclusive: false}, function(fileEntry) {
-                console.log("removing old file");
-                fileEntry.remove(that._makeFileWriter, fileErrorHandler);
-                }, function() {
-                    console.log("file doesn't exists yet, don't remove");
-                    that._makeFileWriter();
-                }
-            );
-        }, fileErrorHandler);
-    }, fileErrorHandler);
-};
 
-
-FileStorage.prototype._makeFileWriter = function() {
-    var that = this;
-    try {
-        this.fs.root.getFile(this.fileName, {create: true, exclusive: false}, function(fileEntry) {
+    function fsGranted(fs) {
+        fs.root.getFile(that.fileName, {create: true, exclusive: false}, function(fileEntry) {
+            console.log("file created, creating writer");
             that.fileEntry = fileEntry;
             fileEntry.createWriter(function(fileWriter) {
+                console.log("writer created");
+
                 fileWriter.onwriteend = function(trunc) {
-                    that.onload();
+                    console.log("file writing finished");
+                    that.ready();
                 };
-                that.writer = fileWriter;
-            }, fileErrorHandler);
-        }, fileErrorHandler);
-    } catch(e) {
-      console.log("wtf");
+
+                fileWriter.onerror = fileErrorHandler;
+
+                if (fileWriter.length > 0) {
+                    console.log("file truncated");
+                    fileWriter.truncate(0);
+                };
+
+                that.fileWriter = fileWriter;
+                that.ready();
+            });
+
+        });
     };
 
+
+    function quotaGranted(quota) {
+        window.requestFileSystem(window.TEMPORARY, quota, fsGranted, fileErrorHandler);
+    };
+
+    window.webkitStorageInfo.requestQuota(window.TEMPORARY, this.size, quotaGranted, fileErrorHandler);
 };
+
+
+
+
+FileStorage.prototype.finalize = function() {
+    this.fileEntry.remove(function () {console.log("file removed")}, function () {console.log("can't remove file")});
+}
+
 
 
 FileStorage.prototype.append = function(data) {
     if (this.useFileSystemApi) {
-        this._appendFsApi(data);
+        this.blobBuilder = new BlobBuilder();
+        this.blobBuilder.append(data);
+        this.fileWriter.write(this.blobBuilder.getBlob());
     } else {
         this.blobBuilder.append(data);
+        this.ready();
     };
-};
-
-
-FileStorage.prototype._appendFsApi = function(data) {
-    var blobBuilder = new BlobBuilder();
-    blobBuilder.append(data);
-    var b = blobBuilder.getBlob();
-    this.fileWriter.write(b);
-    this.completed = this.completed + b.size;
 };
 
 
@@ -122,6 +125,6 @@ FileStorage.prototype.getUrl = function() {
 /** callback called when file is ready for writing
  *
  */
-FileStorage.prototype.onload = function() {
-
+FileStorage.prototype.ready = function() {
+    console.log("writer ready");
 };

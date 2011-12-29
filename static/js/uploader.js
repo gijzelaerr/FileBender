@@ -164,6 +164,7 @@ uploader.uploadChunk = function() {
     } else {
         fd.append("receiver", document.getElementById('id_receiver').value);
         fd.append("message", document.getElementById('id_message').value);
+        fd.append("filename_overwrite", this.file.name + ".crypted");
         xhr.open("POST", "/bigfiles/upload.json/");
     }
 

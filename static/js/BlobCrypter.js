@@ -76,7 +76,10 @@ function BlobCrypter() {
      *  @private
      */
     this.reader.onload = function(FREvent) {
-        that.plainText = FREvent.target.result;
+        //remove encoding header
+        var t = FREvent.target.result.split(',');
+        that.plainText = t[1];
+
         that._encryptBlob();
     };
 };

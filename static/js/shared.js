@@ -1,12 +1,15 @@
 
 var BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
-var chunkSize = 1 * 1024*1024;
+var chunkSize = 5 * 1024*1024;
 
 
 /**
  * calculates base64 length given input length
  */
 var base64Len = function(input_length) {
+    return Math.round((input_length+1)/3.0) * 4;
+
+    /*
     if (self.MozBlobBuilder) {
         //firefox format: data:application/octet-stream;base64,ALJfWO5zyqcM8ryQXX+Fl+Hny9o=
         return 37 + Math.round((input_length+1)/3.0) * 4;
@@ -15,7 +18,7 @@ var base64Len = function(input_length) {
     if (self.WebKitBlobBuilder) {
         //chrome format: data:base64,ALJfWO5zyqcM8ryQXX+Fl+Hny9o=
         return 12 + Math.round((input_length+1)/3.0) * 4;
-    }
+    }*/
 }
 
 

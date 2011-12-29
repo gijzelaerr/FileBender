@@ -63,11 +63,15 @@ def upload(request, json=False):
         form = UploadForm(request.POST, request.FILES)
         if form.is_valid():
             data = request.FILES['file']
-            name = form.cleaned_data['file'].name
             size = form.cleaned_data['file'].size
             expire_date = form.cleaned_data['expire_date'] or one_week_later()
             message = form.cleaned_data['message']
             receiver = form.cleaned_data['receiver']
+
+            if form.cleaned_data['filename_overwrite']:
+                name = form.cleaned_data['filename_overwrite']
+            else:
+                name = form.cleaned_data['file'].name
 
             bigfile = BigFile(name=name, owner=request.user,
                         expire_date=expire_date, message=message, size=size)

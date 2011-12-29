@@ -9,5 +9,6 @@ class UploadForm(forms.Form):
     receiver = forms.EmailField(label='Receiver', required=False)
     expire_date = forms.DateTimeField(label='Expire date',
                               initial=one_week_later, required=False)
+    filename_overwrite = forms.CharField(required=False);
 
 
