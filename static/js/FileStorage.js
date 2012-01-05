@@ -1,6 +1,6 @@
 
 
-self.BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
+window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
 window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
 

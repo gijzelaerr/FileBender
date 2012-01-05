@@ -178,10 +178,9 @@ Downloader.prototype._decryptChunk = function () {
 Downloader.prototype._final = function() {
     this.setStatus("download complete");
     this.setProgress(100);
-    window.location = this.fileStorage.getUrl();
+    //window.location = this.fileStorage.getUrl();
 
 
-    /*
     Downloadify.create('downloadify',{
         filename: function(){
             return this.filename;
@@ -193,13 +192,12 @@ Downloader.prototype._final = function() {
         onCancel: function(){ alert('You have cancelled the saving of this file.'); },
         onError: function(){ alert('You must put something in the File Contents or there will be nothing to save!'); },
         swf: '/media/swf/downloadify.swf',
-        downloadImage: 'media/img/download.png',
+        downloadImage: '/media/img/download.png',
         width: 100,
         height: 30,
         transparent: true,
         append: false
     });
-    */
 };
 
 
