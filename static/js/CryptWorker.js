@@ -36,9 +36,10 @@ self.onmessage = function(event) {
  *
  */
 function doCrypt() {
-    debug("starting encryption");
     try {
+        debug("starting encryption");
         cryptChunk = sjcl.encrypt(key, plainChunk);
+        debug("encryption finished");
     } catch(e) {
         error("can't crypt: " + e.toString());
         return;
@@ -51,8 +52,9 @@ function doCrypt() {
  *
  */
 function done() {
-    debug("encryption finished");
+    debug("returning data");
     postMessage({'status': 'ok', 'data':cryptChunk});
+    debug("data was returned");
 }
 
 

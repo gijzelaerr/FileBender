@@ -7,7 +7,6 @@ uploader = {
     completed: 0,
     doCrypt: true,
     slicer: null,
-    cryptBlob: null,
     fileid: null,
     key: null
 };
@@ -67,7 +66,6 @@ uploader.start = function() {
 
     var that = this;
     this.crypter.oncrypt = function() {
-        that.cryptBlob = this.cryptBlob;
         that.uploadChunk();
     };
 
@@ -124,20 +122,17 @@ uploader.uploadChunk = function() {
             var response = JSON.parse(evt.target.responseText);
         }catch(e) {
             alert("can't parse server response, upload failed");
-            that.reset();
             return;
         };
 
         if (response['status'] == 'error') {
             alert("server gave an error (" + response['message'] + ")");
-            that.reset();
             return;
         };
 
         if(!that.fileid) {
             if (!response['fileid']) {
                 alert("didnt receive a fileID after first chunk");
-                that.reset();
                 return;
             };
             that.fileid = response['fileid'];
@@ -154,7 +149,7 @@ uploader.uploadChunk = function() {
         alert("The upload has been canceled by the user or the browser dropped the connection.");
     }, false);
 
-    fd.append("file", this.cryptBlob);
+    fd.append("file", this.crypter.cryptBlob);
 
     // needed for django cross site scripting prevention
     fd.append("csrfmiddlewaretoken", document.getElementsByName('csrfmiddlewaretoken')[0].value);

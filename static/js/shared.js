@@ -1,6 +1,7 @@
 
 var BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
 var chunkSize = 5 * 1024*1024;
+//var chunkSize = 1024;
 
 
 /**
@@ -26,7 +27,8 @@ var base64Len = function(input_length) {
  * calculates crypted length given input length
  */
 var cryptLen = function(input_length) {
-    return 66 + Math.ceil((input_length - 1) * 4/3);
+    //return 66 + Math.ceil((input_length - 1) * 4/3);
+    return 72 + Math.ceil((input_length - 1) * 4/3);
 }
 
 

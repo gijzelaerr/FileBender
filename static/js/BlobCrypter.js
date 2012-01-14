@@ -8,6 +8,9 @@ function BlobCrypter() {
     this.builder = null;
     this.error = null;
 
+    // set this to false if you want BlobCrypter to by synchronous, eg don't use a worker
+    this.asynchronous = true;
+
     this.worker = new Worker("/media/js/CryptWorker.js");
     this.reader = new FileReader();
 
@@ -80,6 +83,10 @@ function BlobCrypter() {
         var t = FREvent.target.result.split(',');
         that.plainText = t[1];
 
+        if (that.plainText.length != base64Len(chunkSize)) {
+            console.log("ERROR: base64 encoded text is DIFFERENT than expected!");
+        }
+
         that._encryptBlob();
     };
 };
@@ -89,13 +96,12 @@ function BlobCrypter() {
  *  @private
  */
 BlobCrypter.prototype._encryptBlob = function() {
-
-    // asynchronous
-    //this.worker.postMessage({'key': this.key, 'data': this.plainText});
-
-    // synchronous
-    this.cryptText = sjcl.encrypt(this.key, this.plainText);
-    this._cryptFinished();
+    if (this.asynchronous) {
+        this.worker.postMessage({'key': this.key, 'data': this.plainText});
+    } else {
+        this.cryptText = sjcl.encrypt(this.key, this.plainText);
+        this._cryptFinished();
+    };
 };
 
 
@@ -110,6 +116,11 @@ BlobCrypter.prototype._cryptFinished = function() {
 
     this.oncrypt();
     this.oncryptend();
+
+    if (this.cryptText.length != cryptLen(this.plainText.length)) {
+        console.log("ERROR: cyphertext length (" + this.cryptText.length + " is DIFFERENT than expected (" + cryptLen(this.plainText.length) + ")!");
+        console.log(this.cryptText);
+    }
 };
 
 

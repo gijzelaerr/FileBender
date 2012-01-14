@@ -148,8 +148,16 @@ Downloader.prototype._decryptChunk = function () {
 
     var final = this.cryptChunk.charAt(this.cryptChunk.length-1);
     if (final != "}") {
-        alert("alignment problem, check chunkSize");
-        return;
+        var pos = this.cryptChunk.indexOf("}");
+        if (pos == "-1") {
+            alert("no } in chunk, chunkSize (" + chunkSize + ") too small or corrupted data");
+            return;
+        } else {
+            alert("} found at " + pos + "but chunkSize is " + this.chunkSize);
+            return;
+        };
+
+
     }
 
     try {
@@ -178,10 +186,12 @@ Downloader.prototype._decryptChunk = function () {
 Downloader.prototype._final = function() {
     this.setStatus("download complete");
     this.setProgress(100);
-    //window.location = this.fileStorage.getUrl();
+    window.location = this.fileStorage.getUrl();
 
 
+    /*
     Downloadify.create('downloadify',{
+
         filename: function(){
             return this.filename;
         },
@@ -199,6 +209,7 @@ Downloader.prototype._final = function() {
         transparent: true,
         append: false
     });
+*/
 };
 
 
