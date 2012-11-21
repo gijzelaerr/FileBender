@@ -186,30 +186,14 @@ Downloader.prototype._decryptChunk = function () {
 Downloader.prototype._final = function() {
     this.setStatus("download complete");
     this.setProgress(100);
-    window.location = this.fileStorage.getUrl();
+	
+	if ( window.navigator.msSaveBlob) {
+		window.navigator.msSaveBlob(this.fileStorage.blobBuilder.getBlob(), this.fileStorage.fileName);
+		console.log("file offered to user");
+	} else {
+		window.location = this.fileStorage.getUrl();
+	};
 
-
-    /*
-    Downloadify.create('downloadify',{
-
-        filename: function(){
-            return this.filename;
-        },
-        data: function(){
-            return this.fileStorage.getUrl();
-        },
-        //dataType: 'base64',
-        onComplete: function(){ alert('Your File Has Been Saved!'); },
-        onCancel: function(){ alert('You have cancelled the saving of this file.'); },
-        onError: function(){ alert('You must put something in the File Contents or there will be nothing to save!'); },
-        swf: '/media/swf/downloadify.swf',
-        downloadImage: '/media/img/download.png',
-        width: 100,
-        height: 30,
-        transparent: true,
-        append: false
-    });
-*/
 };
 
 

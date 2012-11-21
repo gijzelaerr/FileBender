@@ -113,12 +113,13 @@ FileStorage.prototype.append = function(data) {
 };
 
 
+
 FileStorage.prototype.getUrl = function() {
-    if (this.useFileSystemApi) {
-        return this.fileEntry.toURL();
-    } else {
-        return this.blobBuilder.getBlob().toURL();
-    };
+	if (this.useFileSystemApi) {
+		return this.fileEntry.toURL();
+	} else {
+		return this.blobBuilder.getBlob().toURL();
+	};
 };
 
 

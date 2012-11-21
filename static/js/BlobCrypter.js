@@ -109,7 +109,7 @@ BlobCrypter.prototype._encryptBlob = function() {
  * @private
  */
 BlobCrypter.prototype._cryptFinished = function() {
-    var BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder;
+    var BlobBuilder = self.BlobBuilder || self.WebKitBlobBuilder || self.MozBlobBuilder || self.MSBlobBuilder;
     this.builder = new BlobBuilder();
     this.builder.append(this.cryptText);
     this.cryptBlob = this.builder.getBlob();
