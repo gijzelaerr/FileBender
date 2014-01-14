@@ -4,6 +4,8 @@ INTRODUCTION
 This is filebender, the django clone of filesender. I use this for prototyping
 things that probably will be implemented into filesender.
 
+BIG FAT DISCLAMER: This is no way production ready, and just a toy thingy.
+
 FileSender and FileBender are client side software to share (large) files over
 HTTP using a browser only. It supports large files. FileBender also supports
 client side file encryption.
